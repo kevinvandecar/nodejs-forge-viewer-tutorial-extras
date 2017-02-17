@@ -1,0 +1,214 @@
+// 
+// Online Translation (skip cURL Model Deriviative translation)
+//
+// https://models.autodesk.io/
+// http://view-and-data-prod-uploader.herokuapp.com/
+///////////////////////////////////////////////////////////
+//
+// cURL commands to perform Model Deriviative translation 
+
+// Authenticate curl 2 legged
+
+curl https://developer.api.autodesk.com/authentication/v1/authenticate --data 'client_id=<YOUR_CLIENT_ID>&client_secret=<YOUR_CLIENT_SECRET>&grant_type=client_credentials&scope=data:read data:write bucket:create bucket:read data:create' --header 'Content-Type:application/x-www-form-urlencoded' -k | jq '.'
+
+// Example Token
+{
+  "access_token": "<YOUR_TOKEN>",
+  "token_type": "Bearer",
+  "expires_in": 43199
+}
+
+// Create Bucket
+curl -v 'https://developer.api.autodesk.com/oss/v2/buckets' -X 'POST' -H 'Content-Type: application/json' -H 'Authorization: Bearer <YOUR_TOKEN>' -d '{"policyKey":"transient","bucketKey":"<YOUR_BUCKET_KEY>"}' | jq '.'
+
+// Create Bucket Response
+{
+  "bucketKey": "<YOUR_BUCKET_KEY>",
+  "bucketOwner": "dO1pjPN4Jt0HXswSjFwYRh8a91U1wTru",
+  "createdDate": 1486244606835,
+  "permissions": [
+    {
+      "authId": "dO1pjPN4Jt0HXswSjFwYRh8a91U1wTru",
+      "access": "full"
+    }
+  ],
+  "policyKey": "transient"
+}
+
+
+// verify bucket (optional)
+curl -v 'https://developer.api.autodesk.com/oss/v2/buckets/<YOUR_BUCKET_KEY>/details' -X 'GET' -H 'Authorization: Bearer <YOUR_TOKEN>' | jq '.'
+
+// Example Response
+{
+  "bucketKey": "<YOUR_BUCKET_KEY>",
+  "bucketOwner": "a8y1Hg34MyzXIM2DIX2tNeoGpph0e1fi",
+  "createdDate": 1478039208960,
+  "permissions": [
+    {
+      "authId": "a8y1Hg34MyzXIM2DIX2tNeoGpph0e1fi",
+      "access": "full"
+    }
+  ],
+  "policyKey": "persistent"
+}
+
+
+// upload file
+curl -v 'https://developer.api.autodesk.com/oss/v2/buckets/<YOUR_BUCKET_KEY>/objects/Sports-Car.dwfx' -X 'PUT' -H 'Authorization: Bearer <YOUR_TOKEN>' -H 'Content-Type: application/octet-stream' --data-binary @Sports-Car.dwfx | jq '.'
+
+// Example Response
+{
+  "bucketKey": "<YOUR_BUCKET_KEY>",
+  "objectId": "urn:adsk.objects:os.object:<YOUR_BUCKET_KEY>/Sports-Car.dwfx",
+  "objectKey": "Sports-Car.dwfx",
+  "sha1": "19bfac944a3812854e1e396d686c2aee13a4099f",
+  "size": 13901824,
+  "contentType": "application/octet-stream",
+  "location": "https://developer.api.autodesk.com/oss/v2/buckets/<YOUR_BUCKET_KEY>/objects/Sports-Car.dwfx"
+}
+
+
+// post job - MUST ENCODE URN (for exercise use: https://www.base64encode.org/)
+
+curl -X 'POST' -H 'Content-Type: application/json; charset=utf-8' -H 'Authorization: Bearer <YOUR_TOKEN>' -v 'https://developer.api.autodesk.com/modelderivative/v2/designdata/job' -d '{
+   "input": {
+     "urn": "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA=="
+   },
+   "output": {
+     "formats": [
+       {
+         "type": "svf",
+         "views": [
+           "2d",
+           "3d"
+         ]
+       }
+     ]
+   }
+ }' | jq '.'
+
+
+// Example Status OK and Response
+{
+  "result": "success",
+  "urn": "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA",
+  "acceptedJobs": {
+    "output": {
+      "formats": [
+        {
+          "type": "svf",
+          "views": [
+            "2d",
+            "3d"
+          ]
+        }
+      ]
+    }
+  }
+}
+
+
+// Verify Job (optional)
+curl -X "GET" "https://developer.api.autodesk.com/modelderivative/v2/designdata/dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA/manifest" -H "Authorization: Bearer <YOUR_TOKEN>" | jq '.'
+
+
+// Response example 
+
+{
+  "type": "manifest",
+  "hasThumbnail": "true",
+  "status": "success",
+  "progress": "complete",
+  "region": "US",
+  "urn": "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA",
+  "version": "1.0",
+  "derivatives": [
+    {
+      "name": "Sports-Car.dwfx",
+      "hasThumbnail": "true",
+      "status": "success",
+      "progress": "complete",
+      "outputType": "svf",
+      "children": [
+        {
+          "guid": "d9c7ffad-73b6-4e0e-aa3b-2ad1fac2b4d6",
+          "name": "3d Scene",
+          "hasThumbnail": "true",
+          "role": "3d",
+          "progress": "complete",
+          "status": "success",
+          "type": "geometry",
+          "children": [
+            {
+              "guid": "43027218-2916-4301-a85c-9e2feffa1fbe",
+              "role": "graphics",
+              "mime": "application/autodesk-svf",
+              "urn": "urn:adsk.viewing:fs.file:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA/output/sofia01.svf",
+              "type": "resource"
+            },
+            {
+              "guid": "06f7e1bd-b111-457d-837f-9b6708789c60",
+              "role": "thumbnail",
+              "mime": "image/png",
+              "resolution": [
+                400,
+                400
+              ],
+              "urn": "urn:adsk.viewing:fs.file:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA/output/sofia01.svf.png01_thumb_400x400.png",
+              "type": "resource"
+            },
+            {
+              "guid": "a8498062-549b-4d0e-bf4a-60bb09ca4f4a",
+              "role": "thumbnail",
+              "mime": "image/png",
+              "resolution": [
+                200,
+                200
+              ],
+              "urn": "urn:adsk.viewing:fs.file:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA/output/sofia01.svf.png01_thumb_200x200.png",
+              "type": "resource"
+            },
+            {
+              "guid": "b4530987-d629-48c9-8a8c-148c62b78ca4",
+              "role": "thumbnail",
+              "mime": "image/png",
+              "resolution": [
+                100,
+                100
+              ],
+              "urn": "urn:adsk.viewing:fs.file:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6a2R2dGVzdDAwMS9zb2ZpYTAxLm1heA/output/sofia01.svf.png01_thumb_100x100.png",
+              "type": "resource"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
+
+// retrive metadata (optional)
+
+curl -X "GET" -H "Authorization: Bearer <YOUR_TOKEN>" "https://developer.api.autodesk.com/modelderivative/v2/designdata/dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6amFpbWUtaWZjLXRlc3QvcmFjX2Jhc2ljX3NhbXBsZV9wcm9qZWN0LmlmYw/metadata" | jq '.'
+
+
+{
+  "data": {
+    "type": "metadata",
+    "metadata": [
+      {
+        "name": "rac_basic_sample_project.ifc",
+        "guid": "cf73a51a-f89a-4f27-ab40-1e541896849f"
+      }
+    ]
+  }
+}
+
+
+// metadata properties
+
+curl -X "GET" -H "Authorization: Bearer <YOUR_TOKEN>" "https://developer.api.autodesk.com/modelderivative/v2/designdata/dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6amFpbWUtaWZjLXRlc3QvcmFjX2Jhc2ljX3NhbXBsZV9wcm9qZWN0LmlmYw/metadata/cf73a51a-f89a-4f27-ab40-1e541896849f/properties" | jq '.'
+
+
+
