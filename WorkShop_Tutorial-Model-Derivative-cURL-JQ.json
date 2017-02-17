@@ -24,11 +24,11 @@ curl -v 'https://developer.api.autodesk.com/oss/v2/buckets' -X 'POST' -H 'Conten
 // Create Bucket Response
 {
   "bucketKey": "<YOUR_BUCKET_KEY>",
-  "bucketOwner": "dO1pjPN4Jt0HXswSjFwYRh8a91U1wTru",
+  "bucketOwner": "<OWNER>",
   "createdDate": 1486244606835,
   "permissions": [
     {
-      "authId": "dO1pjPN4Jt0HXswSjFwYRh8a91U1wTru",
+      "authId": "<OWNER>",
       "access": "full"
     }
   ],
@@ -42,11 +42,11 @@ curl -v 'https://developer.api.autodesk.com/oss/v2/buckets/<YOUR_BUCKET_KEY>/det
 // Example Response
 {
   "bucketKey": "<YOUR_BUCKET_KEY>",
-  "bucketOwner": "a8y1Hg34MyzXIM2DIX2tNeoGpph0e1fi",
+  "bucketOwner": "<OWNER>",
   "createdDate": 1478039208960,
   "permissions": [
     {
-      "authId": "a8y1Hg34MyzXIM2DIX2tNeoGpph0e1fi",
+      "authId": "<OWNER>",
       "access": "full"
     }
   ],
